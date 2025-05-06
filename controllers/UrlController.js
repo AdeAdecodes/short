@@ -90,9 +90,13 @@ class UrlController {
       // Lookup location
       let location = null;
       try {
-        const geoRes = await fetch(`https://ipapi.co/${ip}/json/`);
-        const geoData = await geoRes.json();
-        location = `${geoData.city || ''}, ${geoData.region || ''}, ${geoData.country_name || ''}`.trim();
+        let realIP = ip;
+        if (ip === '::1' || ip.startsWith('192.') || ip.startsWith('127.')) {
+          realIP = '8.8.8.8'; // fallback IP for development/testing
+        }
+      
+        const geoRes = await fetch(`https://ipapi.co/${realIP}/country_name/`);
+        location = await geoRes.text();
       } catch (geoErr) {
         console.warn('GeoIP lookup failed:', geoErr.message);
       }
