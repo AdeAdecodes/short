@@ -67,29 +67,37 @@ class UrlController {
   static async redirectUrl(req, res) {
     const { code } = req.params;
     try {
-      // Lookup the URL
-      const urlResult = await db.query('SELECT long_url FROM urls WHERE code = $1', [code]);
-      if (urlResult.rows.length === 0) return res.status(404).send('URL not found');
+      // Lookup the URL record by code
+      const urlResult = await db.query(
+        'SELECT id, long_url FROM urls WHERE code = $1',
+        [code]
+      );
   
-      const longUrl = urlResult.rows[0].long_url;
+      if (urlResult.rows.length === 0) {
+        return res.status(404).send('URL not found');
+      }
+  
+      const { id: urlId, long_url: longUrl } = urlResult.rows[0];
   
       // Track the visit
       const ip = req.ip;
       const userAgent = req.get('User-Agent');
-      const referrer = req.get('Referrer') || req.get('Referer'); // Some clients use different header spellings
-      const location = null; // optional: use a geo-IP API to enrich this later
+      const referrer = req.get('Referrer') || req.get('Referer');
+      const location = null; // Optional: add geo-IP later
   
       await db.query(
-        `INSERT INTO visits(code, ip_address, user_agent, referrer, location)
+        `INSERT INTO visits(short_url_id, ip, user_agent, referrer, location)
          VALUES ($1, $2, $3, $4, $5)`,
-        [code, ip, userAgent, referrer, location]
+        [urlId, ip, userAgent, referrer, location]
       );
   
       res.redirect(longUrl);
     } catch (err) {
+      console.error('Error in redirectUrl:', err);
       res.status(500).send('Error retrieving URL');
     }
   }
+  
   
 
   /**
