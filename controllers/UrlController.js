@@ -70,51 +70,50 @@ class UrlController {
     const { code } = req.params;
   
     try {
-      // Find long URL and its ID
-      const urlResult = await db.query('SELECT id, long_url FROM urls WHERE code = $1', [code]);
-      if (urlResult.rows.length === 0) return res.status(404).send('URL not found');
+      // Get long URL and ID
+      const { rows } = await db.query('SELECT id, long_url FROM urls WHERE code = $1', [code]);
+      if (rows.length === 0) return res.status(404).send('URL not found');
   
-      const { id: urlId, long_url: longUrl } = urlResult.rows[0];
+      const { id: urlId, long_url: longUrl } = rows[0];
+      res.redirect(longUrl); // Redirect immediately
   
-      // Get request metadata
-      const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
+      // Collect metadata
+      const ip = (req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress)?.trim();
       const userAgent = req.get('User-Agent') || '';
       const referrer = req.get('Referrer') || req.get('Referer') || '';
   
-      // Parse user agent
-      const parser = new UAParser(userAgent);
-      const deviceType = parser.getDevice().type || 'desktop';
-      const browser = parser.getBrowser().name || 'Unknown';
-      const operatingSystem = parser.getOS().name || 'Unknown';
+      const { getDevice, getBrowser, getOS } = new UAParser(userAgent);
+      const deviceType = getDevice().type || 'desktop';
+      const browser = getBrowser().name || 'Unknown';
+      const operatingSystem = getOS().name || 'Unknown';
   
-      // Lookup location
+      // Location (GeoIP) lookup
+      const realIP = /^::1|127\.|192\.|::ffff:127\./.test(ip) ? '8.8.8.8' : ip;
       let location = null;
+  
       try {
-        let realIP = ip;
-        if (ip === '::1' || ip.startsWith('192.') || ip.startsWith('127.')) {
-          realIP = '8.8.8.8'; // fallback IP for development/testing
-        }
-      
-        const geoRes = await fetch(`https://ipapi.co/${realIP}/country_name/`);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 2000);
+        const geoRes = await fetch(`https://ipapi.co/${realIP}/country_name/`, { signal: controller.signal });
         location = await geoRes.text();
-      } catch (geoErr) {
-        console.warn('GeoIP lookup failed:', geoErr.message);
+        clearTimeout(timeout);
+      } catch (e) {
+        console.warn('GeoIP lookup failed:', e.message);
       }
   
-      // Save visit
-      await db.query(
-        `INSERT INTO visits(short_url_id, ip, user_agent, referrer, location, device_type, browser, operating_system)
+      // Save visit asynchronously
+      db.query(
+        `INSERT INTO visits (short_url_id, ip, user_agent, referrer, location, device_type, browser, operating_system)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [urlId, ip, userAgent, referrer, location, deviceType, browser, operatingSystem]
-      );
+        [urlId, ip, userAgent, referrer || null, location || null, deviceType, browser, operatingSystem]
+      ).catch(console.error);
   
-      // Redirect user
-      res.redirect(longUrl);
     } catch (err) {
       console.error('Redirect error:', err);
-      res.status(500).send('Error retrieving URL');
     }
   }
+  
+
   
   
 
