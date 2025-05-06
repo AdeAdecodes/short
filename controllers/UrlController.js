@@ -66,28 +66,29 @@ class UrlController {
   /**
    * Redirects a short URL to its original long URL
    */
-  static async redirectUrl(req, res) {
+ static async redirectUrl(req, res) {
     const { code } = req.params;
   
     try {
-      // Get long URL and ID
+      // 1. Get URL info
       const { rows } = await db.query('SELECT id, long_url FROM urls WHERE code = $1', [code]);
       if (rows.length === 0) return res.status(404).send('URL not found');
   
       const { id: urlId, long_url: longUrl } = rows[0];
-      res.redirect(longUrl); // Redirect immediately
   
-      // Collect metadata
+      // 2. Redirect user immediately
+      res.redirect(longUrl);
+  
+      // 3. Collect metadata
       const ip = (req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress)?.trim();
       const userAgent = req.get('User-Agent') || '';
-      const referrer = req.get('Referrer') || req.get('Referer') || '';
+      const referrer = req.get('Referrer') || req.get('Referer') || null;
   
-      const { getDevice, getBrowser, getOS } = new UAParser(userAgent);
-      const deviceType = getDevice().type || 'desktop';
-      const browser = getBrowser().name || 'Unknown';
-      const operatingSystem = getOS().name || 'Unknown';
+      const parser = new UAParser(userAgent);
+      const deviceType = parser.getDevice().type || 'desktop';
+      const browser = parser.getBrowser().name || 'Unknown';
+      const operatingSystem = parser.getOS().name || 'Unknown';
   
-      // Location (GeoIP) lookup
       const realIP = /^::1|127\.|192\.|::ffff:127\./.test(ip) ? '8.8.8.8' : ip;
       let location = null;
   
@@ -97,21 +98,26 @@ class UrlController {
         const geoRes = await fetch(`https://ipapi.co/${realIP}/country_name/`, { signal: controller.signal });
         location = await geoRes.text();
         clearTimeout(timeout);
-      } catch (e) {
-        console.warn('GeoIP lookup failed:', e.message);
+      } catch (err) {
+        console.warn('GeoIP lookup failed:', err.message);
       }
   
-      // Save visit asynchronously
+      // 4. Track visit in parallel
       db.query(
         `INSERT INTO visits (short_url_id, ip, user_agent, referrer, location, device_type, browser, operating_system)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [urlId, ip, userAgent, referrer || null, location || null, deviceType, browser, operatingSystem]
+        [urlId, ip, userAgent, referrer, location, deviceType, browser, operatingSystem]
       ).catch(console.error);
+  
+      // 5. Update visits count
+      db.query('UPDATE urls SET visits = visits + 1 WHERE id = $1', [urlId])
+        .catch(console.error);
   
     } catch (err) {
       console.error('Redirect error:', err);
     }
   }
+  
   
 
   
