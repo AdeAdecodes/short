@@ -129,13 +129,69 @@ class UrlController {
   static async getStatistics(req, res) {
     const { code } = req.params;
     try {
-      const result = await db.query('SELECT * FROM urls WHERE code = $1', [code]);
-      if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
-      return res.json(result.rows[0]);
+      const urlResult = await db.query('SELECT * FROM urls WHERE code = $1', [code]);
+      if (urlResult.rows.length === 0) return res.status(404).json({ error: 'Not found' });
+  
+      const url = urlResult.rows[0];
+  
+      const statsQuery = await db.query(`
+        SELECT 
+          COUNT(*) AS clicks,
+          MAX(visited_at) AS last_accessed
+        FROM visits
+        WHERE short_url_id = $1
+      `, [url.id]);
+  
+      const referrerQuery = await db.query(`
+        SELECT referrer, COUNT(*) AS count
+        FROM visits
+        WHERE short_url_id = $1 AND referrer IS NOT NULL AND referrer != ''
+        GROUP BY referrer
+        ORDER BY count DESC
+        LIMIT 5
+      `, [url.id]);
+  
+      const locationsQuery = await db.query(`
+        SELECT location, COUNT(*) AS count
+        FROM visits
+        WHERE short_url_id = $1 AND location IS NOT NULL
+        GROUP BY location
+        ORDER BY count DESC
+      `, [url.id]);
+  
+      const osQuery = await db.query(`
+        SELECT operating_system, COUNT(*) AS count
+        FROM visits
+        WHERE short_url_id = $1 AND operating_system IS NOT NULL
+        GROUP BY operating_system
+        ORDER BY count DESC
+      `, [url.id]);
+  
+      const deviceQuery = await db.query(`
+        SELECT device_type, COUNT(*) AS count
+        FROM visits
+        WHERE short_url_id = $1 AND device_type IS NOT NULL
+        GROUP BY device_type
+        ORDER BY count DESC
+      `, [url.id]);
+  
+      return res.json({
+        longUrl: url.long_url,
+        shortUrl: url.code,
+        createdAt: url.created_at,
+        clicks: Number(statsQuery.rows[0].clicks) || 0,
+        lastAccessed: statsQuery.rows[0].last_accessed,
+        referrers: referrerQuery.rows.map(row => row.referrer),
+        locations: locationsQuery.rows,
+        operatingSystems: osQuery.rows,
+        deviceTypes: deviceQuery.rows
+      });
+  
     } catch (err) {
       return res.status(500).json({ error: 'Error fetching stats', details: err.message });
     }
   }
+  
 
   /**
    * Lists all available URLs
