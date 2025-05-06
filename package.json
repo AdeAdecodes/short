@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "migration": "node migrations/migration.js",
     "dev": "nodemon index.js"
   },
   "repository": {
@@ -24,6 +25,8 @@
   "dependencies": {
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "nanoid": "^5.1.5",
+    "pg": "^8.15.6"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

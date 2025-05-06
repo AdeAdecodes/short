@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: shortlink-api
+    env: node
+    plan: free
+    region: oregon
+    branch: main
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - fromDatabase:
+          name: short
+          property: connectionString
+        key: DATABASE_URL
+      - key: BASE_URL
+        value: https://short-af4u.onrender.com
+      - key: NODE_ENV 
+        value: production
