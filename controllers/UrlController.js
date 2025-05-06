@@ -1,6 +1,8 @@
 // controllers/UrlController.js
 const { nanoid } = require('nanoid');
 const db = require('../models/db');
+const UAParser = require('ua-parser-js');
+const fetch = require('node-fetch');
 
 /**
  * @class UrlController
@@ -66,34 +68,46 @@ class UrlController {
    */
   static async redirectUrl(req, res) {
     const { code } = req.params;
-    try {
-      // Lookup the URL record by code
-      const urlResult = await db.query(
-        'SELECT id, long_url FROM urls WHERE code = $1',
-        [code]
-      );
   
-      if (urlResult.rows.length === 0) {
-        return res.status(404).send('URL not found');
-      }
+    try {
+      // Find long URL and its ID
+      const urlResult = await db.query('SELECT id, long_url FROM urls WHERE code = $1', [code]);
+      if (urlResult.rows.length === 0) return res.status(404).send('URL not found');
   
       const { id: urlId, long_url: longUrl } = urlResult.rows[0];
   
-      // Track the visit
-      const ip = req.ip;
-      const userAgent = req.get('User-Agent');
-      const referrer = req.get('Referrer') || req.get('Referer');
-      const location = null; // Optional: add geo-IP later
+      // Get request metadata
+      const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
+      const userAgent = req.get('User-Agent') || '';
+      const referrer = req.get('Referrer') || req.get('Referer') || '';
   
+      // Parse user agent
+      const parser = new UAParser(userAgent);
+      const deviceType = parser.getDevice().type || 'desktop';
+      const browser = parser.getBrowser().name || 'Unknown';
+      const operatingSystem = parser.getOS().name || 'Unknown';
+  
+      // Lookup location
+      let location = null;
+      try {
+        const geoRes = await fetch(`https://ipapi.co/${ip}/json/`);
+        const geoData = await geoRes.json();
+        location = `${geoData.city || ''}, ${geoData.region || ''}, ${geoData.country_name || ''}`.trim();
+      } catch (geoErr) {
+        console.warn('GeoIP lookup failed:', geoErr.message);
+      }
+  
+      // Save visit
       await db.query(
-        `INSERT INTO visits(short_url_id, ip, user_agent, referrer, location)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [urlId, ip, userAgent, referrer, location]
+        `INSERT INTO visits(short_url_id, ip, user_agent, referrer, location, device_type, browser, operating_system)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [urlId, ip, userAgent, referrer, location, deviceType, browser, operatingSystem]
       );
   
+      // Redirect user
       res.redirect(longUrl);
     } catch (err) {
-      console.error('Error in redirectUrl:', err);
+      console.error('Redirect error:', err);
       res.status(500).send('Error retrieving URL');
     }
   }
