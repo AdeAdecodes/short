@@ -14,7 +14,6 @@ const RedirectHandler = () => {
         window.location.href = data.originalUrl
       } catch (err) {
         console.error('Redirection failed:', err)
-        // If not found, optionally redirect to home after a short delay
         setTimeout(() => navigate('/'), 3000)
       }
     }

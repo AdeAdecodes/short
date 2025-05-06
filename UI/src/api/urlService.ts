@@ -1,4 +1,4 @@
-const API_BASE = 'https://short-af4u.onrender.com/api'
+const API_BASE = import.meta.env.VITE_API_BASE
 
 export const encodeUrl = async (longUrl: string) => {
   const res = await fetch(`${API_BASE}/encode`, {

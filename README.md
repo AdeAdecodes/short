@@ -1,2 +1,138 @@
-# short
-# short
+# 🧪 Testing the Shortlink App
+
+This guide explains how to test your **URL Shortener** app in both development and production environments.
+
+---
+
+## 📁 Project Structure
+
+```
+project-root/
+├── index.js                # Backend entry point
+├── routes/                 # Express route handlers
+├── models/                 # Database logic
+├── UI/                     # React frontend
+├── .env                    # Environment variables
+└── ...
+```
+
+---
+
+## ⚙️ Environment Setup
+
+### 1. Create `.env` file in the root directory:
+
+```dotenv
+PORT=5000
+BASE_URL=http://localhost:5000
+DATABASE_URL=your_postgresql_connection_url
+NODE_ENV=development
+USE_IN_MEMORY=true         # Set to true for development without PostgreSQL
+```
+
+---
+
+## 🚀 Running the App Locally
+
+### 🔧 Backend
+
+Start the backend API:
+
+```bash
+npm install
+npm start
+```
+
+The backend will run on: [http://localhost:5000](http://localhost:5000)
+
+---
+
+### 💻 Frontend (React)
+
+#### Development mode (hot reload):
+
+```bash
+cd UI
+npm install
+npm run dev
+```
+
+The frontend will run on: [http://localhost:5173](http://localhost:5173) (default Vite port)
+
+#### Production build:
+
+To build and serve production assets:
+
+```bash
+cd UI
+npm run build
+```
+
+Then serve using any static server, e.g.:
+
+```bash
+npm install -g serve
+serve -s dist
+```
+
+> If you want to serve React from the backend, move `UI/dist` into Express `static` folder and update your backend code accordingly.
+
+---
+
+## 🔌 API Testing
+
+### Base URL
+
+- **Development**: `http://localhost:5000/api`
+- **Production**: `https://your-render-url/api`
+
+### 🔁 Encode URL
+
+```http
+POST /api/encode
+Content-Type: application/json
+
+{
+  "longUrl": "https://example.com"
+}
+```
+
+### 🔓 Decode Short URL
+
+```http
+POST /api/decode
+Content-Type: application/json
+
+{
+  "shortUrl": "http://localhost:5000/abc123"
+}
+```
+
+### 📊 Get Statistics
+
+```http
+GET /api/statistic/:code
+```
+
+### 📄 List All URLs
+
+```http
+GET /api/list
+```
+
+### 🔀 Redirection
+
+```http
+GET /:code
+```
+
+Redirects the short code to the original URL.
+
+---
+
+## ✅ Testing Tips
+
+- Use [Postman](https://www.postman.com/) or [Insomnia](https://insomnia.rest/) to test the API endpoints.
+- Check console logs for `In-Memory Mode` confirmation when `USE_IN_MEMORY=true` is enabled.
+- Confirm API requests are hitting the right base URL (`localhost` or your Render URL).
+- Add CORS headers if testing frontend and backend on different ports.
