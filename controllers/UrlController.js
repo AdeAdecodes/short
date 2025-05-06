@@ -203,7 +203,8 @@ class UrlController {
         shortUrl: `${process.env.BASE_URL}/${row.code}`,
         longUrl: row.long_url,
         createdAt: row.created_at,
-        visits: row.visits
+        visits: row.visits,
+        code: row.code
       }));
       return res.json(formatted);
     } catch (err) {
