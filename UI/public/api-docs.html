@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>URL Shortener API Docs</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 1rem; }
+    code { background: #f4f4f4; padding: 2px 4px; border-radius: 4px; }
+    pre { background: #f4f4f4; padding: 1rem; border-radius: 5px; overflow-x: auto; }
+    h1 { color: #0065F2; }
+    .endpoint { margin-bottom: 2rem; }
+  </style>
+</head>
+<body>
+  <h1>📘 URL Shortener API</h1>
+  <p>Use the following endpoints to shorten, decode, and track URLs programmatically.</p>
+
+  <div class="endpoint">
+    <h2>1. Encode URL</h2>
+    <p><strong>POST</strong> <code>/api/encode</code></p>
+    <p><strong>Body:</strong></p>
+    <pre>{
+  "longUrl": "https://example.com/some/long/path"
+}</pre>
+    <p><strong>Response:</strong></p>
+    <pre>{
+  "shortUrl": "https://yourdomain.com/abc123",
+  "isNew": true,
+  "message": "URL successfully shortened"
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <h2>2. Decode URL</h2>
+    <p><strong>POST</strong> <code>/api/decode</code></p>
+    <p><strong>Body:</strong></p>
+    <pre>{
+  "shortUrl": "https://yourdomain.com/abc123"
+}</pre>
+    <p><strong>Response:</strong></p>
+    <pre>{
+  "longUrl": "https://example.com/some/long/path"
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <h2>3. URL Statistics</h2>
+    <p><strong>GET</strong> <code>/api/statistic/:code</code></p>
+    <p><strong>Response:</strong></p>
+    <pre>{
+  "longUrl": "https://example.com",
+  "shortUrl": "abc123",
+  "createdAt": "2025-05-06T14:32:00Z",
+  "clicks": 42,
+  "lastAccessed": "2025-05-08T11:03:00Z",
+  "referrers": ["https://google.com", "https://twitter.com"],
+  "locations": [{ "location": "Nigeria", "count": 10 }],
+  "operatingSystems": [{ "operating_system": "Windows", "count": 8 }],
+  "deviceTypes": [{ "device_type": "mobile", "count": 15 }]
+}</pre>
+  </div>
+
+  <div class="endpoint">
+    <h2>4. List All URLs</h2>
+    <p><strong>GET</strong> <code>/api/list</code></p>
+    <p><strong>Response:</strong></p>
+    <pre>[
+  {
+    "shortUrl": "https://yourdomain.com/abc123",
+    "longUrl": "https://example.com",
+    "createdAt": "2025-05-06T14:32:00Z",
+    "visits": 42,
+    "code": "abc123"
+  },
+  ...
+]</pre>
+  </div>
+
+  <div class="endpoint">
+    <h2>5. Redirect</h2>
+    <p><strong>GET</strong> <code>/{code}</code></p>
+    <p>This endpoint redirects the user to the original long URL and collects visit analytics in the background.</p>
+  </div>
+
+</body>
+</html>
