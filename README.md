@@ -1,4 +1,3 @@
-
 # 🧪 Testing the Shortlink App
 
 This guide explains how to test the **URL Shortener** app in both development and production environments.
@@ -41,11 +40,19 @@ The backend will run on: [http://localhost:5000](http://localhost:5000)
 ---
 
 ### 💻 Frontend (React)
+```bash
+cd UI
+```
+
+## Create `.env` file in the root directory of the frontend(UI):
+
+```dotenv
+VITE_API_BASE=http://localhost:5000/api
+```
 
 #### Development mode (hot reload):
 
 ```bash
-cd UI
 npm install
 npm run dev
 ```
@@ -77,7 +84,9 @@ serve -s dist
 ### Base URL
 
 - **Development**: `http://localhost:5000/api`
+- **Development-API-docs**: `http://localhost:5000/api-docs`
 - **Production**: `https://short-af4u.onrender.com/api`
+- **Production-API-docs**: `https://short-af4u.onrender.com/api-docs`
 
 ### 🔁 Encode URL
 
