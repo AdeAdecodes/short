@@ -7,7 +7,7 @@
     "start": "node index.js",
     "migration": "node migrations/migration.js",
     "dev": "nodemon index.js",
-    "test": "node test.js"
+    "test": "jest test.js"
   },
   "repository": {
     "type": "git",
@@ -29,7 +29,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "nanoid": "^5.1.5",
+    "nanoid": "^3.3.11",
     "node-fetch": "^2.7.0",
     "pg": "^8.15.6",
     "react-router-dom": "^7.5.3",

@@ -1,20 +1,7 @@
+
 # 🧪 Testing the Shortlink App
 
 This guide explains how to test your **URL Shortener** app in both development and production environments.
-
----
-
-## 📁 Project Structure
-
-```
-project-root/
-├── index.js                # Backend entry point
-├── routes/                 # Express route handlers
-├── models/                 # Database logic
-├── UI/                     # React frontend
-├── .env                    # Environment variables
-└── ...
-```
 
 ---
 
@@ -41,6 +28,12 @@ Start the backend API:
 ```bash
 npm install
 npm start
+```
+
+To run backend tests:
+
+```bash
+npm run test
 ```
 
 The backend will run on: [http://localhost:5000](http://localhost:5000)
@@ -84,7 +77,7 @@ serve -s dist
 ### Base URL
 
 - **Development**: `http://localhost:5000/api`
-- **Production**: `https://your-render-url/api`
+- **Production**: `https://short-af4u.onrender.com/api`
 
 ### 🔁 Encode URL
 
@@ -136,3 +129,10 @@ Redirects the short code to the original URL.
 - Check console logs for `In-Memory Mode` confirmation when `USE_IN_MEMORY=true` is enabled.
 - Confirm API requests are hitting the right base URL (`localhost` or your Render URL).
 - Add CORS headers if testing frontend and backend on different ports.
+
+---
+
+## 🌐 Live URLs
+
+- **Frontend**: [https://short-1-yqej.onrender.com](https://short-1-yqej.onrender.com)
+- **Backend**: [https://short-af4u.onrender.com](https://short-af4u.onrender.com)
