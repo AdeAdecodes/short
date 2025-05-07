@@ -1,7 +1,7 @@
 
 # 🧪 Testing the Shortlink App
 
-This guide explains how to test your **URL Shortener** app in both development and production environments.
+This guide explains how to test the **URL Shortener** app in both development and production environments.
 
 ---
 
