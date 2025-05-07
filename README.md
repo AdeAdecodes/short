@@ -1,3 +1,4 @@
+
 # 🧪 Testing the Shortlink App
 
 This guide explains how to test the **URL Shortener** app in both development and production environments.
@@ -75,8 +76,6 @@ npm install -g serve
 serve -s dist
 ```
 
-> If you want to serve React from the backend, move `UI/dist` into Express `static` folder and update your backend code accordingly.
-
 ---
 
 ## 🔌 API Testing
@@ -137,7 +136,6 @@ Redirects the short code to the original URL.
 - Use [Postman](https://www.postman.com/) or [Insomnia](https://insomnia.rest/) to test the API endpoints.
 - Check console logs for `In-Memory Mode` confirmation when `USE_IN_MEMORY=true` is enabled.
 - Confirm API requests are hitting the right base URL (`localhost` or your Render URL).
-- Add CORS headers if testing frontend and backend on different ports.
 
 ---
 
