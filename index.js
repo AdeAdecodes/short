@@ -17,3 +17,6 @@ app.use('/', urlRoutes);
 app.listen(PORT, () => {
   console.log(`🚀 Server running at ${BASE_URL}`);
 });
+
+
+module.exports = app; // Export app for testing
