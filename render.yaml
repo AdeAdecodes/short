@@ -16,14 +16,3 @@ services:
         value: production
       - key: DATABASE_URL
         value: ${DATABASE_URL} # You can link to your database if needed
-
-  - type: web
-    name: shortlink-ui
-    env: static
-    plan: free
-    region: oregon
-    buildCommand: npm run build
-    startCommand: serve -s Ui/build
-    envVars:
-      - key: BASE_URL
-        value: https://short-af4u.onrender.com
