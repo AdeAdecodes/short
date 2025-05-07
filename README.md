@@ -84,7 +84,9 @@ serve -s dist
 ### Base URL
 
 - **Development**: `http://localhost:5000/api`
+- **Development-API-docs**: `http://localhost:5000/api-docs`
 - **Production**: `https://short-af4u.onrender.com/api`
+- **Production-API-docs**: `https://short-af4u.onrender.com/api-docs`
 
 ### 🔁 Encode URL
 
