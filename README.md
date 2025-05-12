@@ -4,6 +4,13 @@
 This guide explains how to test the **URL Shortener** app in both development and production environments.
 
 ---
+## ⚙️ GIT Setup
+
+```bash
+Git clone https://github.com/AdeAdecodes/short.git
+cd short
+```
+
 
 ## ⚙️ Environment Setup
 
